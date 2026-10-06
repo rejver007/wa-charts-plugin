@@ -228,7 +228,7 @@ final class Chart_Types {
 	 * @param string $shape    Data shape.
 	 * @param string $icon     Dashicon name without the `dashicons-` prefix.
 	 * @param array  $options  Type-specific option specs.
-	 * @param int    $max_rows Maximum number of rows.
+	 * @param int    $max_rows Rows the chart displays (the rest are kept in the data but not drawn).
 	 * @return array
 	 */
 	private static function def( string $label, string $shape, string $icon, array $options, int $max_rows = 500 ): array {

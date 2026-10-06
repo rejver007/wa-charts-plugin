@@ -2,6 +2,7 @@
 namespace WebAula\Charts\Tests;
 
 use WebAula\Charts\Chart_Data;
+use WebAula\Charts\Post_Type;
 
 class ChartDataTest extends TestCase {
 
@@ -78,7 +79,7 @@ class ChartDataTest extends TestCase {
 		$this->assertSame( array(), $r['errors'] );
 	}
 
-	public function test_single_shape_drops_extra_series_and_fills_colours() {
+	public function test_single_shape_keeps_extra_series_and_fills_colours() {
 		$raw                 = $this->pie();
 		$raw['series'][]     = array(
 			'name'   => 'Extra',
@@ -86,9 +87,105 @@ class ChartDataTest extends TestCase {
 		);
 		$raw['point_colors'] = array( 'not-a-colour' );
 		$r                   = Chart_Data::sanitize( $raw );
-		$this->assertCount( 1, $r['config']['series'] );
+		$this->assertCount( 2, $r['config']['series'] );
+		$this->assertSame( 'Extra', $r['config']['series'][1]['name'] );
+		$this->assertSame( array( 1.0, 2.0 ), $r['config']['series'][1]['values'] );
 		$this->assertSame( array( '#1A98D1', '#08588C' ), $r['config']['point_colors'] );
 		$this->assertCount( 1, $r['errors'] );
+	}
+
+	public function test_type_switch_round_trip_loses_nothing() {
+		$labels = array();
+		$first  = array();
+		$second = array();
+		for ( $i = 0; $i < 8; $i++ ) {
+			$labels[] = 'Row ' . $i;
+			$first[]  = $i + 1;
+			$second[] = ( $i + 1 ) * 10;
+		}
+		$raw = array(
+			'type'         => 'pie',
+			'labels'       => $labels,
+			'series'       => array(
+				array(
+					'name'   => 'A',
+					'values' => $first,
+				),
+				array(
+					'name'   => 'B',
+					'values' => $second,
+					'color'  => '#ff0000',
+					'render' => 'line',
+				),
+			),
+			'point_colors' => array( '#111111', '#222222' ),
+		);
+		$pie = Chart_Data::sanitize( $raw );
+		$this->assertSame( array(), $pie['errors'] );
+		$gauge = Chart_Data::sanitize( array_merge( $pie['config'], array( 'type' => 'radial' ) ) );
+		$this->assertSame( array(), $gauge['errors'] );
+		$this->assertCount( 8, $gauge['config']['labels'] );
+		$back = Chart_Data::sanitize( array_merge( $gauge['config'], array( 'type' => 'pie' ) ) );
+		$this->assertSame( $pie['config']['labels'], $back['config']['labels'] );
+		$this->assertSame( $pie['config']['series'], $back['config']['series'] );
+		$this->assertSame( $pie['config']['point_colors'], $back['config']['point_colors'] );
+		$this->assertCount( 8, $back['config']['point_colors'] );
+	}
+
+	public function test_legacy_pie_config_passes_through_unchanged() {
+		$legacy = array(
+			'schema'       => 1,
+			'type'         => 'pie',
+			'labels'       => array( 'A', 'B' ),
+			'series'       => array(
+				array(
+					'name'   => 'Budget',
+					'color'  => null,
+					'render' => null,
+					'values' => array( 1.0, 2.0 ),
+				),
+			),
+			'point_colors' => array( '#111111', '#222222' ),
+		);
+		$config = Chart_Data::sanitize( $legacy )['config'];
+		$this->assertSame( $legacy['series'], $config['series'] );
+		$this->assertSame( $legacy['point_colors'], $config['point_colors'] );
+
+		$id = self::factory()->post->create( array( 'post_type' => Post_Type::SLUG ) );
+		update_post_meta( $id, Chart_Data::META_KEY, wp_slash( wp_json_encode( $legacy ) ) );
+		$stored = Chart_Data::get( $id );
+		$this->assertSame( $legacy['series'], $stored['series'] );
+		$this->assertSame( $legacy['point_colors'], $stored['point_colors'] );
+	}
+
+	public function test_legacy_bar_config_keeps_series_and_render() {
+		$legacy = array(
+			'schema'       => 1,
+			'type'         => 'bar',
+			'labels'       => array( 'Q1', 'Q2' ),
+			'series'       => array(
+				array(
+					'name'   => 'Sales',
+					'color'  => '#ff0000',
+					'render' => null,
+					'values' => array( 1.0, 2.0 ),
+				),
+				array(
+					'name'   => 'Cost',
+					'color'  => '#00ff00',
+					'render' => null,
+					'values' => array( 3.0, 4.0 ),
+				),
+			),
+			'point_colors' => array(),
+		);
+		$config = Chart_Data::sanitize( $legacy )['config'];
+		$this->assertSame( $legacy['series'], $config['series'] );
+		$this->assertSame( 'bar', $config['type'] );
+
+		$id = self::factory()->post->create( array( 'post_type' => Post_Type::SLUG ) );
+		update_post_meta( $id, Chart_Data::META_KEY, wp_slash( wp_json_encode( $legacy ) ) );
+		$this->assertSame( $legacy['series'], Chart_Data::get( $id )['series'] );
 	}
 
 	public function test_eight_digit_hex_is_allowed() {
@@ -119,9 +216,12 @@ class ChartDataTest extends TestCase {
 		$this->assertSame( '#ff0000', $c['series'][1]['color'] );
 		$this->assertSame( 'line', $c['series'][0]['render'] );
 		$this->assertSame( 'bar', $c['series'][1]['render'] );
-		$this->assertSame( array(), $c['point_colors'] );
+		$this->assertSame( array( '#1A98D1', '#08588C' ), $c['point_colors'] );
 
 		$raw['type'] = 'bar';
+		$this->assertSame( 'line', Chart_Data::sanitize( $raw )['config']['series'][0]['render'] );
+		$this->assertNull( Chart_Data::sanitize( $raw )['config']['series'][1]['render'] );
+		unset( $raw['series'][0]['render'] );
 		$this->assertNull( Chart_Data::sanitize( $raw )['config']['series'][0]['render'] );
 	}
 
@@ -141,8 +241,8 @@ class ChartDataTest extends TestCase {
 		$this->assertNotEmpty( $r['errors'] );
 
 		$r = Chart_Data::sanitize( $this->pie( array( 'type' => 'radial' ) ) );
-		$this->assertSame( array( 'UVA' ), $r['config']['labels'] );
-		$this->assertNotEmpty( $r['errors'] );
+		$this->assertSame( array( 'UVA', 'Aalto' ), $r['config']['labels'] );
+		$this->assertSame( array(), $r['errors'] );
 	}
 
 	public function test_display_sanitizing() {

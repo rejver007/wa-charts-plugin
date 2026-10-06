@@ -50,6 +50,48 @@ class RendererTest extends TestCase {
 		$this->assertSame( array( '#1A98D1', '#08588C' ), $payload['pointColors'] );
 	}
 
+	public function test_fallback_table_shows_only_the_first_series_of_a_single_shape_chart() {
+		$id   = $this->create_chart(
+			array(
+				'series' => array(
+					array(
+						'name'   => 'Budget',
+						'values' => array( 3.65, 1.6 ),
+					),
+					array(
+						'name'   => 'Hidden',
+						'values' => array( 7, 8 ),
+					),
+				),
+			)
+		);
+		$html = Renderer::output( $id );
+		$this->assertSame( 2, substr_count( $html, '<th scope="col">' ) );
+		$this->assertStringNotContainsString( 'Hidden</th>', $html );
+		$this->assertStringContainsString( '<th scope="row">UVA</th><td>3,65</td></tr>', $html );
+		$this->assertCount( 2, $this->payload_from( $html )['series'] );
+	}
+
+	public function test_fallback_table_of_a_gauge_shows_only_the_first_row() {
+		$id   = $this->create_chart(
+			array(
+				'type'   => 'radial',
+				'labels' => array( 'One', 'Two', 'Three' ),
+				'series' => array(
+					array(
+						'name'   => 'Share',
+						'values' => array( 10, 20, 30 ),
+					),
+				),
+			)
+		);
+		$html = Renderer::output( $id );
+		$this->assertSame( 1, substr_count( $html, '<th scope="row">' ) );
+		$this->assertStringContainsString( '<th scope="row">One</th><td>10</td>', $html );
+		$this->assertStringNotContainsString( '<th scope="row">Two', $html );
+		$this->assertCount( 3, $this->payload_from( $html )['labels'] );
+	}
+
 	public function test_omits_caption_without_text() {
 		$this->assertStringNotContainsString( 'figcaption', Renderer::output( $this->create_chart() ) );
 	}

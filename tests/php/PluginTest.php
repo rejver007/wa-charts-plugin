@@ -6,7 +6,7 @@ use WebAula\Charts\Plugin;
 class PluginTest extends TestCase {
 
 	public function test_constants_are_defined() {
-		$this->assertSame( '1.0.0', WA_CHARTS_VERSION );
+		$this->assertSame( '1.1.0', WA_CHARTS_VERSION );
 		$this->assertStringEndsWith( '/', WA_CHARTS_DIR );
 	}
 

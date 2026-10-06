@@ -132,21 +132,18 @@ final class Chart_Data {
 		}
 
 		$raw     = self::drop_empty_rows( $raw );
-		$labels  = self::sanitize_labels( $raw['labels'] ?? array(), Chart_Types::get( $type )['max_rows'], $errors );
+		$labels  = self::sanitize_labels( $raw['labels'] ?? array(), $errors );
 		$series  = self::sanitize_series( $raw['series'] ?? array(), count( $labels ), $type, $errors );
 		$palette = Chart_Types::default_palette();
 		$colors  = array();
 
-		if ( Chart_Types::SHAPE_SINGLE === Chart_Types::shape( $type ) ) {
-			$series              = array( $series[0] );
-			$series[0]['color']  = null;
-			$series[0]['render'] = null;
-			$raw_colors          = isset( $raw['point_colors'] ) && is_array( $raw['point_colors'] ) ? array_values( $raw['point_colors'] ) : array();
-			foreach ( array_keys( $labels ) as $i ) {
-				$color    = self::color( $raw_colors[ $i ] ?? null, $errors );
-				$colors[] = $color ?? $palette[ $i % count( $palette ) ];
-			}
-		} else {
+		// Nothing is dropped when the type changes: the type's shape and max_rows only decide what is displayed.
+		$raw_colors = isset( $raw['point_colors'] ) && is_array( $raw['point_colors'] ) ? array_values( $raw['point_colors'] ) : array();
+		foreach ( array_keys( $labels ) as $i ) {
+			$color    = self::color( $raw_colors[ $i ] ?? null, $errors );
+			$colors[] = $color ?? $palette[ $i % count( $palette ) ];
+		}
+		if ( Chart_Types::SHAPE_MULTI === Chart_Types::shape( $type ) ) {
 			foreach ( $series as $n => $item ) {
 				if ( null === $item['color'] ) {
 					$series[ $n ]['color'] = $palette[ $n % count( $palette ) ];
@@ -266,18 +263,16 @@ final class Chart_Data {
 	/**
 	 * Sanitizes labels.
 	 *
-	 * @param mixed    $raw      Raw labels.
-	 * @param int      $max_rows Row limit for the type.
-	 * @param string[] $errors   Collected errors.
+	 * @param mixed    $raw    Raw labels.
+	 * @param string[] $errors Collected errors.
 	 * @return string[]
 	 */
-	private static function sanitize_labels( $raw, int $max_rows, array &$errors ): array {
+	private static function sanitize_labels( $raw, array &$errors ): array {
 		$labels = is_array( $raw ) ? array_values( $raw ) : array();
-		$limit  = min( $max_rows, self::MAX_LABELS );
-		if ( count( $labels ) > $limit ) {
+		if ( count( $labels ) > self::MAX_LABELS ) {
 			/* translators: %d: maximum number of rows. */
-			$errors[] = sprintf( _n( 'This chart type shows at most %d row; extra rows were removed.', 'This chart type shows at most %d rows; extra rows were removed.', $limit, 'wa-charts' ), $limit );
-			$labels   = array_slice( $labels, 0, $limit );
+			$errors[] = sprintf( _n( 'At most %d row is allowed; extra rows were removed.', 'At most %d rows are allowed; extra rows were removed.', self::MAX_LABELS, 'wa-charts' ), self::MAX_LABELS );
+			$labels   = array_slice( $labels, 0, self::MAX_LABELS );
 		}
 		return array_map( static fn( $label ) => self::text( $label, self::MAX_TEXT ), $labels );
 	}
@@ -308,9 +303,9 @@ final class Chart_Data {
 			for ( $i = 0; $i < $label_count; $i++ ) {
 				$values[] = self::number( $raw_values[ $i ] ?? null, $errors );
 			}
-			$render = null;
-			if ( 'mixed' === $type ) {
-				$render = isset( $item['render'] ) && 'line' === $item['render'] ? 'line' : 'bar';
+			$render = isset( $item['render'] ) && in_array( $item['render'], array( 'bar', 'line' ), true ) ? $item['render'] : null;
+			if ( 'mixed' === $type && null === $render ) {
+				$render = 'bar';
 			}
 			$out[] = array(
 				'name'   => self::text( $item['name'] ?? '', self::MAX_TEXT ),

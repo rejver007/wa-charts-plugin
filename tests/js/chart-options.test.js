@@ -129,6 +129,95 @@ describe( 'buildConfig', () => {
 		expect( c.options.plugins.waCenterText.text ).toBe( '3.65M€' );
 	} );
 
+	it( 'draws only the first series of a pie', () => {
+		const c = buildConfig(
+			pie( {
+				series: [
+					{ name: 'A', color: null, render: null, values: [ 1, 2 ] },
+					{
+						name: 'B',
+						color: '#222222',
+						render: null,
+						values: [ 5, 6 ],
+					},
+				],
+			} )
+		);
+		expect( c.data.datasets ).toHaveLength( 1 );
+		expect( c.data.datasets[ 0 ].data ).toEqual( [ 1, 2 ] );
+	} );
+
+	it( 'uses only the first row of a gauge with many rows', () => {
+		const c = buildConfig(
+			pie( {
+				type: 'radial',
+				labels: [ 'One', 'Two', 'Three' ],
+				series: [
+					{
+						name: '',
+						color: null,
+						render: null,
+						values: [ 4, 8, 9 ],
+					},
+				],
+				pointColors: [ '#1A98D1', '#08588C', '#113C56' ],
+				typeOptions: { max: 10 },
+			} )
+		);
+		expect( c.data.datasets ).toHaveLength( 1 );
+		expect( c.data.datasets[ 0 ].data ).toEqual( [ 4, 6 ] );
+		expect( c.data.labels ).toEqual( [ 'One', '' ] );
+		expect( c.options.plugins.waCenterText.text ).toBe( '4M€' );
+	} );
+
+	it( 'ignores point colours for multi types', () => {
+		const c = buildConfig(
+			multi( 'bar', { pointColors: [ '#abcdef', '#fedcba' ] } )
+		);
+		expect( c.data.datasets.map( ( d ) => d.backgroundColor ) ).toEqual( [
+			'#111111',
+			'#222222',
+		] );
+	} );
+
+	it( 'lists only the first row of a gauge in the legend', () => {
+		const items = legendItems(
+			pie( {
+				type: 'radial',
+				labels: [ 'One', 'Two', 'Three' ],
+				series: [
+					{
+						name: '',
+						color: null,
+						render: null,
+						values: [ 4, 8, 9 ],
+					},
+				],
+				pointColors: [ '#1A98D1', '#08588C', '#113C56' ],
+			} )
+		);
+		expect( items ).toHaveLength( 1 );
+		expect( items[ 0 ].label ).toBe( 'One' );
+	} );
+
+	it( 'uses only series 0 values in a pie legend', () => {
+		const items = legendItems(
+			pie( {
+				series: [
+					{ name: 'A', color: null, render: null, values: [ 1, 2 ] },
+					{
+						name: 'B',
+						color: '#222222',
+						render: null,
+						values: [ 5, 6 ],
+					},
+				],
+			} )
+		);
+		expect( items ).toHaveLength( 2 );
+		expect( items.map( ( i ) => i.value ) ).toEqual( [ '1M€', '2M€' ] );
+	} );
+
 	it( 'builds horizontal bars', () => {
 		const c = buildConfig(
 			multi( 'bar-horizontal', { typeOptions: { bar_width: 50 } } )

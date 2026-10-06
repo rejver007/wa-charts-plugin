@@ -221,21 +221,23 @@ final class Renderer {
 	}
 
 	/**
-	 * Accessible data table, also the no-JS fallback.
+	 * Accessible data table, also the no-JS fallback. It lists only what the chart type shows.
 	 *
 	 * @param array $config Config.
 	 * @return string
 	 */
 	private static function table( array $config ): string {
-		$value = $config['display']['value'];
-		$head  = '<th scope="col">' . esc_html__( 'Label', 'wa-charts' ) . '</th>';
-		foreach ( $config['series'] as $series ) {
+		$value  = $config['display']['value'];
+		$head   = '<th scope="col">' . esc_html__( 'Label', 'wa-charts' ) . '</th>';
+		$shown  = Chart_Types::SHAPE_SINGLE === Chart_Types::shape( $config['type'] ) ? array_slice( $config['series'], 0, 1 ) : $config['series'];
+		$labels = array_slice( $config['labels'], 0, (int) Chart_Types::get( $config['type'] )['max_rows'], true );
+		foreach ( $shown as $series ) {
 			$head .= '<th scope="col">' . esc_html( '' !== $series['name'] ? $series['name'] : __( 'Value', 'wa-charts' ) ) . '</th>';
 		}
 		$rows = '';
-		foreach ( $config['labels'] as $i => $label ) {
+		foreach ( $labels as $i => $label ) {
 			$rows .= '<tr><th scope="row">' . esc_html( $label ) . '</th>';
-			foreach ( $config['series'] as $series ) {
+			foreach ( $shown as $series ) {
 				$rows .= '<td>' . esc_html( self::format_plain( (float) ( $series['values'][ $i ] ?? 0 ), $value ) ) . '</td>';
 			}
 			$rows .= '</tr>';
