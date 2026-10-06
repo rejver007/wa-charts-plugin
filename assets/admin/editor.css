@@ -1,0 +1,108 @@
+.wa-charts-type-picker {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+	gap: 8px;
+}
+
+.wa-charts-type {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 12px 8px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.wa-charts-type .dashicons {
+	width: 28px;
+	height: 28px;
+	font-size: 28px;
+}
+
+.wa-charts-type.is-active {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+#wa-charts-type-warning {
+	grid-column: 1 / -1;
+}
+
+.wa-charts-table input[type="text"] {
+	width: 100%;
+}
+
+.wa-charts-table .wa-charts-value {
+	max-width: 9em;
+}
+
+.wa-charts-table .is-invalid {
+	border-color: #d63638;
+	box-shadow: 0 0 0 1px #d63638;
+}
+
+.wa-charts-handle {
+	width: 24px;
+	color: #8c8f94;
+	cursor: move;
+}
+
+.wa-charts-handle-col,
+.wa-charts-remove-col {
+	width: 28px;
+}
+
+.wa-charts-series-head {
+	min-width: 170px;
+	vertical-align: top;
+}
+
+.wa-charts-series-head > * {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.wa-charts-toolbar .button {
+	margin: 0 6px 6px 0;
+}
+
+.wa-charts-paste {
+	margin-top: 12px;
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	background: #f6f7f7;
+}
+
+.wa-charts-fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 0 24px;
+}
+
+.wa-charts-field label {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: 600;
+}
+
+.wa-charts-field--bool label {
+	display: inline;
+	margin-left: 4px;
+	font-weight: 400;
+}
+
+.wa-charts-field .description {
+	display: block;
+}
+
+#wa-charts-preview {
+	min-height: 220px;
+}
+
+.wa-charts-errors {
+	margin: 8px 0 0;
+	color: #d63638;
+}

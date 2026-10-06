@@ -1,0 +1,21 @@
+{
+	"iq_pie_chart_heading": "Public research<br> project budget ",
+	"iq_pie_chart_content": "9,2M €",
+	"iq_pie_chart_data_series_count": 8,
+	"iq_pie_chart_label0": "UVA", "iq_pie_chart_value0": 3.65, "iq_pie_chart_gradient_1_0": "#1A98D1",
+	"iq_pie_chart_label1": "Aalto", "iq_pie_chart_value1": 1.6, "iq_pie_chart_gradient_1_1": "#08588C",
+	"iq_pie_chart_label2": "VTT", "iq_pie_chart_value2": 1.46, "iq_pie_chart_gradient_1_2": "#113C56",
+	"iq_pie_chart_label3": "ÅAU", "iq_pie_chart_value3": 0.74, "iq_pie_chart_gradient_1_3": "#A1BF23",
+	"iq_pie_chart_label4": "TAU", "iq_pie_chart_value4": 0.5, "iq_pie_chart_gradient_1_4": "#D3E0E6",
+	"iq_pie_chart_label5": "LUT", "iq_pie_chart_value5": 0.41, "iq_pie_chart_gradient_1_5": "#4B4C4B",
+	"iq_pie_chart_label6": "UOULU", "iq_pie_chart_value6": 0.68, "iq_pie_chart_gradient_1_6": "#333333",
+	"iq_pie_chart_label7": "UTU", "iq_pie_chart_value7": 0.16, "iq_pie_chart_gradient_1_7": "#000000",
+	"iq_pie_chart_label8": "Oct",
+	"iq_pie_chart_legend_show_series_value": "yes",
+	"iq_pie_chart_font_family": "IBM Plex Sans",
+	"iq_pie_card_title_font_color": "#4B4C4B",
+	"_css_classes": "charts",
+	"hide_mobile": "",
+	"__globals__": { "iq_pie_chart_gradient_1_0": "" },
+	"custom_css": "selector p.sub-heading.graphina-chart-sub-heading {\r\n    font-size: 42px;\r\n    color: #113C56 !important;\r\n}\r\nselector .apexcharts-legend-series {\r\n    width: 45% !important;\r\n}\r\n\r\nselector span.apexcharts-legend-text div::after {\r\n    content: \"M€\";\r\n    display: inline-block;\r\n}\r\n"
+}

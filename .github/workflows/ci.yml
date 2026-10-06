@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:js
+      - run: npm run test:js
+      - run: npm run build
+      - name: Built block is committed
+        run: test -z "$(git status --porcelain -- build/)"
+
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.1', core: '"WordPress/WordPress#6.6"', wpunit: '6.6.*' }
+          - { php: '8.3', core: '"WordPress/WordPress#6.6"', wpunit: '6.6.*' }
+          - { php: '8.1', core: 'null', wpunit: '*' }
+          - { php: '8.3', core: 'null', wpunit: '*', lint: true }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: wp-env override
+        run: |
+          echo '{ "core": ${{ matrix.core }}, "phpVersion": "${{ matrix.php }}" }' > .wp-env.override.json
+      - run: npx wp-env start
+      - run: npm run composer -- install --no-interaction
+      - run: npm run composer -- require --dev --no-interaction --with-all-dependencies "wp-phpunit/wp-phpunit:${{ matrix.wpunit }}"
+      - run: npm run lint:php
+        if: ${{ matrix.lint }}
+      - run: npm run test:php

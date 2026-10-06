@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "webaula/chart",
+	"title": "Chart",
+	"category": "widgets",
+	"icon": "chart-pie",
+	"description": "Shows a chart created under Charts.",
+	"keywords": [ "chart", "graph", "kaavio" ],
+	"textdomain": "wa-charts",
+	"attributes": {
+		"chartId": { "type": "number", "default": 0 },
+		"height": { "type": "number" },
+		"layout": {
+			"type": "string",
+			"enum": [ "", "left", "right", "top" ],
+			"default": ""
+		},
+		"legend": {
+			"type": "string",
+			"enum": [ "", "bottom", "right", "none" ],
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"customClassName": true,
+		"align": [ "wide", "full" ]
+	},
+	"editorScript": "file:./index.js"
+}

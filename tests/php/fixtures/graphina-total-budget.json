@@ -1,0 +1,11 @@
+{
+	"iq_pie_chart_heading": "Total budget ",
+	"iq_pie_chart_content": "18,3M €",
+	"iq_pie_chart_data_series_count": 2,
+	"iq_pie_chart_label0": "Public research project", "iq_pie_chart_value0": 9.2, "iq_pie_chart_gradient_1_0": "#1A98D1",
+	"iq_pie_chart_label1": "Companies budget", "iq_pie_chart_value1": 9.1, "iq_pie_chart_gradient_1_1": "#05597F",
+	"iq_pie_chart_label2": "Mar",
+	"iq_pie_chart_legend_show_series_value": "yes",
+	"_css_classes": "charts",
+	"custom_css": "selector span.apexcharts-legend-text div::after {\r\n    content: \"M€\";\r\n}\r\n"
+}
