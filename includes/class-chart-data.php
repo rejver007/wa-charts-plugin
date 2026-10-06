@@ -24,6 +24,7 @@ final class Chart_Data {
 	public const MAX_BYTES        = 102400;
 	public const LAYOUTS          = array( 'left', 'right', 'top' );
 	public const LEGEND_POSITIONS = array( 'bottom', 'right', 'none' );
+	public const LABEL_FORMATS    = array( 'value', 'percent' );
 	public const LOCALES          = array( 'fi-FI', 'en-US', 'sv-SE', 'de-DE' );
 	public const HEADING_TAGS     = array(
 		'br'     => array(),
@@ -72,25 +73,26 @@ final class Chart_Data {
 	 */
 	public static function default_display(): array {
 		return array(
-			'heading'     => '',
-			'subheading'  => '',
-			'layout'      => 'left',
-			'height'      => 320,
-			'legend'      => array(
+			'heading'      => '',
+			'subheading'   => '',
+			'layout'       => 'left',
+			'height'       => 320,
+			'legend'       => array(
 				'position'    => 'bottom',
 				'columns'     => 1,
 				'show_values' => true,
 			),
-			'value'       => array(
+			'value'        => array(
 				'prefix'   => '',
 				'suffix'   => '',
 				'decimals' => 2,
 				'locale'   => 'fi-FI',
 			),
-			'data_labels' => false,
-			'tooltips'    => true,
-			'animation'   => true,
-			'font_family' => '',
+			'data_labels'  => false,
+			'label_format' => 'value',
+			'tooltips'     => true,
+			'animation'    => true,
+			'font_family'  => '',
 		);
 	}
 
@@ -332,25 +334,26 @@ final class Chart_Data {
 		$value  = isset( $raw['value'] ) && is_array( $raw['value'] ) ? $raw['value'] : array();
 
 		return array(
-			'heading'     => self::heading( $raw['heading'] ?? '' ),
-			'subheading'  => self::heading( $raw['subheading'] ?? '' ),
-			'layout'      => self::choice( $raw['layout'] ?? null, self::LAYOUTS, $defaults['layout'] ),
-			'height'      => (int) self::between( $raw['height'] ?? null, 100, 2000, $defaults['height'], true ),
-			'legend'      => array(
+			'heading'      => self::heading( $raw['heading'] ?? '' ),
+			'subheading'   => self::heading( $raw['subheading'] ?? '' ),
+			'layout'       => self::choice( $raw['layout'] ?? null, self::LAYOUTS, $defaults['layout'] ),
+			'height'       => (int) self::between( $raw['height'] ?? null, 100, 2000, $defaults['height'], true ),
+			'legend'       => array(
 				'position'    => self::choice( $legend['position'] ?? null, self::LEGEND_POSITIONS, 'bottom' ),
 				'columns'     => (int) self::between( $legend['columns'] ?? null, 1, 2, 1, true ),
 				'show_values' => self::boolean( $legend['show_values'] ?? null, true ),
 			),
-			'value'       => array(
+			'value'        => array(
 				'prefix'   => self::affix( $value['prefix'] ?? '' ),
 				'suffix'   => self::affix( $value['suffix'] ?? '' ),
 				'decimals' => (int) self::between( $value['decimals'] ?? null, 0, 6, 2, true ),
 				'locale'   => self::choice( $value['locale'] ?? null, self::LOCALES, 'fi-FI' ),
 			),
-			'data_labels' => self::boolean( $raw['data_labels'] ?? null, false ),
-			'tooltips'    => self::boolean( $raw['tooltips'] ?? null, true ),
-			'animation'   => self::boolean( $raw['animation'] ?? null, true ),
-			'font_family' => self::font_family( $raw['font_family'] ?? '' ),
+			'data_labels'  => self::boolean( $raw['data_labels'] ?? null, false ),
+			'label_format' => self::choice( $raw['label_format'] ?? null, self::LABEL_FORMATS, 'value' ),
+			'tooltips'     => self::boolean( $raw['tooltips'] ?? null, true ),
+			'animation'    => self::boolean( $raw['animation'] ?? null, true ),
+			'font_family'  => self::font_family( $raw['font_family'] ?? '' ),
 		);
 	}
 

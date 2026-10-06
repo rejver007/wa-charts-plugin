@@ -822,6 +822,38 @@
 		return next;
 	}
 
+	/**
+	 * The "Show on the chart" choice. Shown only while data labels are on
+	 * and only for pie, donut and polar charts (hidden for the others, as
+	 * percentages are not offered there).
+	 *
+	 * @return {Array} Zero or one field specs.
+	 */
+	function labelFormatFields() {
+		const percentTypes = [ 'pie', 'donut', 'polar' ];
+		if (
+			! getPath( state, 'display.data_labels' ) ||
+			! percentTypes.includes( state.type )
+		) {
+			return [];
+		}
+		return [
+			{
+				path: 'display.label_format',
+				type: 'enum',
+				label: __( 'Show on the chart', 'wa-charts' ),
+				choices: {
+					value: __( 'Value', 'wa-charts' ),
+					percent: __( 'Percentage', 'wa-charts' ),
+				},
+				help: __(
+					'Very small slices are left without a label.',
+					'wa-charts'
+				),
+			},
+		];
+	}
+
 	function displaySections() {
 		return [
 			{
@@ -940,7 +972,9 @@
 						path: 'display.data_labels',
 						type: 'bool',
 						label: __( 'Show values on the chart', 'wa-charts' ),
+						rerender: true,
 					},
+					...labelFormatFields(),
 					{
 						path: 'display.tooltips',
 						type: 'bool',
@@ -963,9 +997,19 @@
 			id,
 		} );
 		control.checked = !! value;
-		control.addEventListener( 'change', () =>
-			update( setPath( state, spec.path, control.checked ) )
-		);
+		control.addEventListener( 'change', () => {
+			update(
+				setPath( state, spec.path, control.checked ),
+				spec.rerender ? { display: true } : {}
+			);
+			if ( spec.rerender ) {
+				// The Display section was re-rendered; keep keyboard focus.
+				const next = document.getElementById( id );
+				if ( next ) {
+					next.focus();
+				}
+			}
+		} );
 		return el( 'label', { class: 'wa-charts-toggle', for: id }, [
 			control,
 			el( 'span', {

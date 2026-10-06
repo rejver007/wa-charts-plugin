@@ -17,6 +17,7 @@ const display = ( overrides = {} ) => ( {
 	legend: { position: 'bottom', columns: 1, show_values: true },
 	value: { prefix: '', suffix: 'M€', decimals: 2, locale: 'en-US' },
 	data_labels: false,
+	label_format: 'value',
 	tooltips: true,
 	animation: true,
 	font_family: '',
@@ -329,5 +330,145 @@ describe( 'legendItems', () => {
 			[ 'dataset', 'A' ],
 			[ 'dataset', 'B' ],
 		] );
+	} );
+} );
+
+describe( 'percentage data labels', () => {
+	const values = [ 10, 5, 6, 8, 4, 2, 1 ];
+	const percentPie = ( type = 'pie', overrides = {} ) =>
+		pie( {
+			type,
+			labels: values.map( ( _, i ) => `L${ i }` ),
+			series: [ { name: '', color: null, render: null, values } ],
+			pointColors: values.map( () => '#336699' ),
+			display: display( {
+				data_labels: true,
+				label_format: 'percent',
+				...overrides,
+			} ),
+		} );
+	const ctx = ( dataIndex, visible = () => true ) => ( {
+		dataIndex,
+		dataset: { data: values },
+		chart: { getDataVisibility: visible },
+	} );
+	const labels = ( payload ) =>
+		buildConfig( payload, {} ).options.plugins.datalabels;
+
+	it( 'shows each slice as a share of the total', () => {
+		const dl = labels( percentPie() );
+		expect( dl.formatter( 10, ctx( 0 ) ) ).toBe( '27.8%' );
+		expect( dl.formatter( 5, ctx( 1 ) ) ).toBe( '13.9%' );
+	} );
+	it( 'ignores the value prefix and suffix for percentages', () => {
+		const dl = labels( percentPie() );
+		expect( dl.formatter( 10, ctx( 0 ) ) ).not.toContain( 'M€' );
+	} );
+	it( 'uses the locale for the percent format', () => {
+		const dl = labels(
+			percentPie( 'pie', {
+				value: {
+					prefix: '',
+					suffix: '',
+					decimals: 2,
+					locale: 'fi-FI',
+				},
+			} )
+		);
+		expect( nbsp( dl.formatter( 10, ctx( 0 ) ) ) ).toBe( '27,8 %' );
+	} );
+	it( 'recalculates when a slice is hidden', () => {
+		const dl = labels( percentPie() );
+		const hideLast = ( i ) => i !== 6;
+		expect( dl.formatter( 10, ctx( 0, hideLast ) ) ).toBe( '28.6%' );
+	} );
+	it( 'falls back to all values without visibility support', () => {
+		const dl = labels( percentPie() );
+		const bare = { dataIndex: 0, dataset: { data: values } };
+		expect( dl.formatter( 10, bare ) ).toBe( '27.8%' );
+	} );
+	it( 'returns no label for slices under 3 percent', () => {
+		const dl = labels( percentPie() );
+		expect( dl.formatter( 1, ctx( 6 ) ) ).toBe( '' );
+		expect( dl.formatter( 2, ctx( 5 ) ) ).toBe( '5.6%' );
+	} );
+	it( 'works for donut and polar charts', () => {
+		[ 'donut', 'polar' ].forEach( ( type ) => {
+			expect(
+				labels( percentPie( type ) ).formatter( 10, ctx( 0 ) )
+			).toBe( '27.8%' );
+		} );
+	} );
+	it( 'keeps value labels with prefix and suffix by default', () => {
+		const dl = labels( percentPie( 'pie', { label_format: 'value' } ) );
+		expect( dl.formatter( 10, ctx( 0 ) ) ).toBe( '10M€' );
+	} );
+	it( 'styles single-shape labels white and semi-bold, centred', () => {
+		[ 'value', 'percent' ].forEach( ( format ) => {
+			const dl = labels( percentPie( 'pie', { label_format: format } ) );
+			expect( dl.color ).toBe( '#fff' );
+			expect( dl.font.weight ).toBe( 600 );
+			expect( dl.anchor ).toBe( 'center' );
+		} );
+	} );
+	it( 'falls back to values on multi-shape charts', () => {
+		const p = multi( 'bar', {
+			display: display( { data_labels: true, label_format: 'percent' } ),
+		} );
+		const dl = labels( p );
+		expect( dl.formatter( 3, { dataIndex: 0, dataset: {} } ) ).toBe(
+			'3M€'
+		);
+		expect( dl.color ).toBeUndefined();
+	} );
+	it( 'keeps radial labels off', () => {
+		const p = percentPie( 'radial' );
+		expect( labels( p ).display ).toBe( false );
+	} );
+	it( 'lets libraryOverrides win', () => {
+		const p = percentPie( 'pie', {} );
+		p.libraryOverrides = { plugins: { datalabels: { color: '#000' } } };
+		expect( labels( p ).color ).toBe( '#000' );
+	} );
+} );
+
+describe( 'datalabels collision handling', () => {
+	const values = [ 10, 5, 6, 8, 4, 2, 1 ];
+	const cfg = ( format ) =>
+		buildConfig(
+			pie( {
+				labels: values.map( ( _, i ) => `L${ i }` ),
+				series: [ { name: '', color: null, render: null, values } ],
+				display: display( {
+					data_labels: true,
+					label_format: format,
+				} ),
+			} ),
+			{}
+		).options.plugins.datalabels;
+	const ctx = ( dataIndex ) => ( {
+		dataIndex,
+		dataset: { data: values },
+		chart: { getDataVisibility: () => true },
+	} );
+
+	it( 'uses three bands in percent mode', () => {
+		const dl = cfg( 'percent' );
+		expect( dl.display( ctx( 0 ) ) ).toBe( true );
+		expect( dl.display( ctx( 1 ) ) ).toBe( true );
+		expect( dl.display( ctx( 5 ) ) ).toBe( 'auto' );
+		expect( dl.display( ctx( 6 ) ) ).toBe( false );
+	} );
+	it( 'keeps the plain boolean display in value mode', () => {
+		expect( cfg( 'value' ).display ).toBe( true );
+	} );
+	it( 'does not throw when the dataset has no data', () => {
+		const dl = cfg( 'percent' );
+		expect( dl.display( { dataIndex: 0, dataset: {} } ) ).toBe( true );
+		expect( dl.display( {} ) ).toBe( true );
+	} );
+	it( 'keeps labels off when data labels are off', () => {
+		const dl = buildConfig( pie(), {} ).options.plugins.datalabels;
+		expect( dl.display ).toBe( false );
 	} );
 } );

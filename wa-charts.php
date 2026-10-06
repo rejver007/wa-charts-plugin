@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/rejver007/wa-charts-plugin
  * Update URI:        https://github.com/rejver007/wa-charts-plugin
  * Description:       Charts as a custom post type, shown with a shortcode or block. Replaces Graphina.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.6
  * Requires PHP:      8.1
  * Author:            WebAula Oy
@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WA_CHARTS_VERSION', '1.1.0' );
+define( 'WA_CHARTS_VERSION', '1.1.1' );
 define( 'WA_CHARTS_FILE', __FILE__ );
 define( 'WA_CHARTS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WA_CHARTS_URL', plugin_dir_url( __FILE__ ) );

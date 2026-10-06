@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WebAula Charts 1.1.0\n"
+"Project-Id-Version: WebAula Charts 1.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wa-charts\n"
 "Last-Translator: WebAula Oy\n"
 "Language-Team: Finnish\n"
@@ -659,3 +659,15 @@ msgstr "Toiminta"
 #, js-format
 msgid "Show %s as"
 msgstr "Näytä %s muodossa"
+
+#: assets/admin/editor.js
+msgid "Show on the chart"
+msgstr "Näytä kaaviossa"
+
+#: assets/admin/editor.js
+msgid "Percentage"
+msgstr "Prosentti"
+
+#: assets/admin/editor.js
+msgid "Very small slices are left without a label."
+msgstr "Hyvin pienissä osuuksissa ei näytetä tekstiä."

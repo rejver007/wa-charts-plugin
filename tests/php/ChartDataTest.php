@@ -288,6 +288,28 @@ class ChartDataTest extends TestCase {
 		$this->assertSame( 'IBM Plex Sans  body  color red', $d['font_family'] );
 	}
 
+	public function test_label_format_defaults_to_value() {
+		$this->assertSame( 'value', Chart_Data::default_display()['label_format'] );
+		$d = Chart_Data::sanitize( $this->pie() )['config']['display'];
+		$this->assertSame( 'value', $d['label_format'] );
+	}
+
+	public function test_label_format_percent_is_kept() {
+		$r = Chart_Data::sanitize( $this->pie( array( 'display' => array( 'label_format' => 'percent' ) ) ) );
+		$this->assertSame( 'percent', $r['config']['display']['label_format'] );
+	}
+
+	public function test_invalid_label_format_falls_back_to_value() {
+		$r = Chart_Data::sanitize( $this->pie( array( 'display' => array( 'label_format' => 'ratio' ) ) ) );
+		$this->assertSame( 'value', $r['config']['display']['label_format'] );
+	}
+
+	public function test_legacy_config_without_label_format_gets_value() {
+		$r = Chart_Data::sanitize( $this->pie( array( 'display' => array( 'data_labels' => true ) ) ) );
+		$this->assertSame( 'value', $r['config']['display']['label_format'] );
+		$this->assertTrue( $r['config']['display']['data_labels'] );
+	}
+
 	public function test_type_options_are_clamped() {
 		$c = Chart_Data::sanitize(
 			array(

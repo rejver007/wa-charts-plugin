@@ -24,6 +24,13 @@
 	};
 	const SINGLE = [ 'pie', 'donut', 'polar', 'radial' ];
 	const isSingle = ( type ) => SINGLE.includes( type );
+	// Single-shape types that can show percentage labels (not the radial gauge).
+	const PERCENT_TYPES = [ 'pie', 'donut', 'polar' ];
+	// Slices below this share (0.03 = 3 %) get no percentage label, to avoid clutter.
+	const MIN_PERCENT_SHARE = 0.03;
+	// Slices at or above this share (0.10 = 10 %) are always labelled; smaller
+	// ones use datalabels 'auto', so a larger slice wins when labels collide.
+	const ALWAYS_SHOW_SHARE = 0.1;
 
 	function formatValue( value, valueCfg ) {
 		const cfg = valueCfg || {};
@@ -91,6 +98,59 @@
 				totals[ i ] ? ( ( Number( v ) || 0 ) / totals[ i ] ) * 100 : 0
 			)
 		);
+	}
+
+	/**
+	 * A value's share (0 to 1) of the visible data in its dataset. Slices
+	 * hidden through chart.getDataVisibility are left out of the total;
+	 * without that support, all values are summed.
+	 *
+	 * @param {number} value Slice value.
+	 * @param {Object} ctx   Datalabels context.
+	 * @return {number} Share between 0 and 1.
+	 */
+	function shareOf( value, ctx ) {
+		const data = ( ctx && ctx.dataset && ctx.dataset.data ) || [];
+		const chart = ctx && ctx.chart;
+		const canTell = chart && typeof chart.getDataVisibility === 'function';
+		const total = data.reduce(
+			( sum, v, i ) =>
+				canTell && ! chart.getDataVisibility( i )
+					? sum
+					: sum + ( Number( v ) || 0 ),
+			0
+		);
+		return total > 0 ? ( Number( value ) || 0 ) / total : 0;
+	}
+
+	/**
+	 * Builds a datalabels formatter that prints each slice's share of the
+	 * visible data. Slices hidden from the legend (via
+	 * chart.getDataVisibility) are left out of the total, so the others
+	 * recalculate. Without visibility support, all values are summed.
+	 *
+	 * @param {string} locale BCP 47 locale for the number format.
+	 * @return {(value: number, ctx: Object) => string} Formatter.
+	 */
+	function percentFormatter( locale ) {
+		let nf;
+		try {
+			nf = new Intl.NumberFormat( locale || 'fi-FI', {
+				style: 'percent',
+				minimumFractionDigits: 0,
+				maximumFractionDigits: 1,
+			} );
+		} catch {
+			nf = new Intl.NumberFormat( 'fi-FI', {
+				style: 'percent',
+				minimumFractionDigits: 0,
+				maximumFractionDigits: 1,
+			} );
+		}
+		return ( value, ctx ) => {
+			const share = shareOf( value, ctx );
+			return share < MIN_PERCENT_SHARE ? '' : nf.format( share );
+		};
 	}
 
 	function buildConfig( payload, env ) {
@@ -170,6 +230,38 @@
 					borderWidth: 0,
 				},
 			];
+			const labelCfg = options.plugins.datalabels;
+			labelCfg.color = '#fff';
+			labelCfg.anchor = 'center';
+			labelCfg.font = { family, weight: 600 };
+			const percent =
+				display.label_format === 'percent' &&
+				PERCENT_TYPES.includes( type );
+			if ( display.data_labels && percent ) {
+				// Big slices are always labelled; small ones hide when they
+				// collide, and tiny ones get no label. Value mode keeps the
+				// plain boolean from 1.1.0.
+				labelCfg.display = ( ctx ) => {
+					const data =
+						ctx && ctx.dataset && Array.isArray( ctx.dataset.data )
+							? ctx.dataset.data
+							: null;
+					// Chart.js may resolve this option without a dataset context.
+					if ( ! data ) {
+						return true;
+					}
+					const share = shareOf( data[ ctx.dataIndex ], ctx );
+					if ( share < MIN_PERCENT_SHARE ) {
+						return false;
+					}
+					return share >= ALWAYS_SHOW_SHARE ? true : 'auto';
+				};
+			}
+			if ( percent ) {
+				labelCfg.formatter = percentFormatter(
+					( display.value || {} ).locale
+				);
+			}
 			if ( type === 'pie' || type === 'donut' ) {
 				options.rotation = Number( opts.start_angle ) || 0;
 			}
