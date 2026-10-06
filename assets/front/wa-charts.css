@@ -78,20 +78,65 @@
 	display: none;
 }
 
-.wa-chart__legend-button {
+.wa-chart--legend-right .wa-chart__legend {
+	flex: 0 1 auto;
+	max-width: 45%;
+}
+
+/* Themes often style every list item (bullets) and every button (colours,
+ * padding, hover backgrounds). The legend must look the same everywhere, so
+ * reset those properties with enough specificity to win over theme rules. */
+.wa-chart .wa-chart__legend .wa-chart__legend-item {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	background: none;
+}
+
+.wa-chart .wa-chart__legend .wa-chart__legend-item::before,
+.wa-chart .wa-chart__legend .wa-chart__legend-item::after,
+.wa-chart .wa-chart__legend .wa-chart__legend-item::marker {
+	content: none;
+	display: none;
+}
+
+.wa-chart .wa-chart__legend .wa-chart__legend-button,
+.wa-chart .wa-chart__legend .wa-chart__legend-button:hover,
+.wa-chart .wa-chart__legend .wa-chart__legend-button:focus,
+.wa-chart .wa-chart__legend .wa-chart__legend-button:active {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5em;
+	width: auto;
+	min-width: 0;
+	min-height: 0;
+	margin: 0;
 	padding: 0;
 	border: 0;
+	border-radius: 0;
 	background: none;
+	box-shadow: none;
 	color: inherit;
 	font: inherit;
+	line-height: inherit;
+	letter-spacing: inherit;
 	text-align: start;
+	text-decoration: none;
+	text-transform: none;
+	white-space: normal;
 	cursor: pointer;
 }
 
-.wa-chart__legend-button:disabled {
+.wa-chart .wa-chart__legend .wa-chart__legend-button:focus-visible {
+	outline: 2px solid currentcolor;
+	outline-offset: 2px;
+}
+
+.wa-chart .wa-chart__legend .wa-chart__legend-button:hover .wa-chart__legend-label {
+	text-decoration: underline;
+}
+
+.wa-chart .wa-chart__legend .wa-chart__legend-button:disabled {
 	cursor: default;
 }
 
@@ -140,20 +185,47 @@
 	background: #fcf0f1;
 }
 
+/* Chart and text stack below 600px; a right-hand legend stays beside the
+ * chart down to 400px, then moves under it. */
 @container (max-width: 600px) {
-	.wa-chart__inner,
-	.wa-chart--legend-right .wa-chart__plot {
+
+	.wa-chart__inner {
 		flex-direction: column !important;
 		align-items: stretch;
 	}
 }
 
+@container (max-width: 400px) {
+
+	.wa-chart--legend-right .wa-chart__plot {
+		flex-direction: column !important;
+		align-items: stretch;
+	}
+
+	.wa-chart--legend-right .wa-chart__legend {
+		max-width: none;
+	}
+}
+
 @supports not (container-type: inline-size) {
+
 	@media (max-width: 600px) {
-		.wa-chart__inner,
+
+		.wa-chart__inner {
+			flex-direction: column !important;
+			align-items: stretch;
+		}
+	}
+
+	@media (max-width: 400px) {
+
 		.wa-chart--legend-right .wa-chart__plot {
 			flex-direction: column !important;
 			align-items: stretch;
+		}
+
+		.wa-chart--legend-right .wa-chart__legend {
+			max-width: none;
 		}
 	}
 }
