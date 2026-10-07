@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WebAula Charts 1.1.1\n"
+"Project-Id-Version: WebAula Charts 1.1.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wa-charts\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T12:14:16+00:00\n"
+"POT-Creation-Date: 2026-10-07T07:49:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wa-charts\n"
@@ -39,18 +39,18 @@ msgstr ""
 msgid "https://webaula.fi"
 msgstr ""
 
-#: includes/class-chart-data.php:124
+#: includes/class-chart-data.php:126
 msgid "Chart data was not readable and has been reset."
 msgstr ""
 
 #. translators: %s: the rejected chart type.
-#: includes/class-chart-data.php:132
+#: includes/class-chart-data.php:134
 #, php-format
 msgid "Unknown chart type \"%s\"; Pie is used instead."
 msgstr ""
 
 #. translators: %d: maximum number of rows.
-#: includes/class-chart-data.php:276
+#: includes/class-chart-data.php:278
 #, php-format
 msgid "At most %d row is allowed; extra rows were removed."
 msgid_plural "At most %d rows are allowed; extra rows were removed."
@@ -58,19 +58,19 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: maximum number of series.
-#: includes/class-chart-data.php:295
+#: includes/class-chart-data.php:297
 #, php-format
 msgid "At most %d series are allowed; extra series were removed."
 msgstr ""
 
 #. translators: %s: the rejected value.
-#: includes/class-chart-data.php:473
+#: includes/class-chart-data.php:476
 #, php-format
 msgid "Value \"%s\" is not a number and was set to 0."
 msgstr ""
 
 #. translators: %s: the rejected colour.
-#: includes/class-chart-data.php:498
+#: includes/class-chart-data.php:501
 #, php-format
 msgid "Colour \"%s\" is not valid and was replaced."
 msgstr ""
@@ -587,24 +587,36 @@ msgid "Show values in the legend"
 msgstr ""
 
 #: assets/admin/editor.js:974
+msgid "Clicking a legend item"
+msgstr ""
+
+#: assets/admin/editor.js:976
+msgid "Hides it"
+msgstr ""
+
+#: assets/admin/editor.js:977
+msgid "Highlights it"
+msgstr ""
+
+#: assets/admin/editor.js:983
 msgid "Show values on the chart"
 msgstr ""
 
-#: assets/admin/editor.js:981
+#: assets/admin/editor.js:990
 msgid "Tooltips"
 msgstr ""
 
-#: assets/admin/editor.js:986
+#: assets/admin/editor.js:995
 msgid "Animation"
 msgstr ""
 
 #. translators: %s: chart type name.
-#: assets/admin/editor.js:1198
+#: assets/admin/editor.js:1207
 #, js-format
 msgid "%s options"
 msgstr ""
 
-#: assets/admin/editor.js:1253
+#: assets/admin/editor.js:1262
 msgid "The preview could not be loaded."
 msgstr ""
 

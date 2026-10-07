@@ -969,6 +969,15 @@
 						label: __( 'Show values in the legend', 'wa-charts' ),
 					},
 					{
+						path: 'display.legend.on_click',
+						type: 'enum',
+						label: __( 'Clicking a legend item', 'wa-charts' ),
+						choices: {
+							toggle: __( 'Hides it', 'wa-charts' ),
+							highlight: __( 'Highlights it', 'wa-charts' ),
+						},
+					},
+					{
 						path: 'display.data_labels',
 						type: 'bool',
 						label: __( 'Show values on the chart', 'wa-charts' ),

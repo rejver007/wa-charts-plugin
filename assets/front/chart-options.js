@@ -383,5 +383,38 @@
 		} ) );
 	}
 
-	return { formatValue, deepMerge, withAlpha, buildConfig, legendItems };
+	/**
+	 * Chart elements a legend item points at, for highlighting.
+	 * A data item (a slice) maps to that point in every dataset long
+	 * enough to have it; a dataset item maps to all of its points.
+	 *
+	 * @param {Object}   item  Legend item from legendItems().
+	 * @param {number[]} sizes Number of points in each dataset.
+	 * @return {Object[]} { datasetIndex, index } pairs.
+	 */
+	function highlightTargets( item, sizes ) {
+		if ( item.kind === 'data' ) {
+			return sizes
+				.map( ( size, datasetIndex ) =>
+					item.index < size
+						? { datasetIndex, index: item.index }
+						: null
+				)
+				.filter( Boolean );
+		}
+		const size = sizes[ item.index ] || 0;
+		return Array.from( { length: size }, ( unused, index ) => ( {
+			datasetIndex: item.index,
+			index,
+		} ) );
+	}
+
+	return {
+		formatValue,
+		deepMerge,
+		withAlpha,
+		buildConfig,
+		legendItems,
+		highlightTargets,
+	};
 } );

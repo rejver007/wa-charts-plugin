@@ -278,6 +278,7 @@ class ChartDataTest extends TestCase {
 				'position'    => 'bottom',
 				'columns'     => 2,
 				'show_values' => true,
+				'on_click'    => 'toggle',
 			),
 			$d['legend']
 		);
@@ -308,6 +309,22 @@ class ChartDataTest extends TestCase {
 		$r = Chart_Data::sanitize( $this->pie( array( 'display' => array( 'data_labels' => true ) ) ) );
 		$this->assertSame( 'value', $r['config']['display']['label_format'] );
 		$this->assertTrue( $r['config']['display']['data_labels'] );
+	}
+
+	public function test_legend_click_defaults_to_toggle() {
+		$this->assertSame( 'toggle', Chart_Data::default_display()['legend']['on_click'] );
+		$d = Chart_Data::sanitize( $this->pie() )['config']['display'];
+		$this->assertSame( 'toggle', $d['legend']['on_click'] );
+	}
+
+	public function test_legend_click_highlight_is_kept() {
+		$r = Chart_Data::sanitize( $this->pie( array( 'display' => array( 'legend' => array( 'on_click' => 'highlight' ) ) ) ) );
+		$this->assertSame( 'highlight', $r['config']['display']['legend']['on_click'] );
+	}
+
+	public function test_invalid_legend_click_falls_back_to_toggle() {
+		$r = Chart_Data::sanitize( $this->pie( array( 'display' => array( 'legend' => array( 'on_click' => 'explode' ) ) ) ) );
+		$this->assertSame( 'toggle', $r['config']['display']['legend']['on_click'] );
 	}
 
 	public function test_type_options_are_clamped() {

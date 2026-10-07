@@ -54,6 +54,7 @@ class GraphinaMapperTest extends TestCase {
 				'position'    => 'bottom',
 				'columns'     => 2,
 				'show_values' => true,
+				'on_click'    => 'toggle',
 			),
 			$config['display']['legend']
 		);

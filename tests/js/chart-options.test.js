@@ -5,6 +5,7 @@ const {
 	withAlpha,
 	buildConfig,
 	legendItems,
+	highlightTargets,
 } = require( '../../assets/front/chart-options' );
 
 const nbsp = ( s ) => s.replace( /[\u00a0\u202f]/g, ' ' );
@@ -330,6 +331,36 @@ describe( 'legendItems', () => {
 			[ 'dataset', 'A' ],
 			[ 'dataset', 'B' ],
 		] );
+	} );
+} );
+
+describe( 'highlightTargets', () => {
+	it( 'targets one slice in every dataset for a data item', () => {
+		expect( highlightTargets( { kind: 'data', index: 2 }, [ 4 ] ) ).toEqual(
+			[ { datasetIndex: 0, index: 2 } ]
+		);
+	} );
+	it( 'skips datasets too short for the slice', () => {
+		expect(
+			highlightTargets( { kind: 'data', index: 2 }, [ 4, 2, 3 ] )
+		).toEqual( [
+			{ datasetIndex: 0, index: 2 },
+			{ datasetIndex: 2, index: 2 },
+		] );
+	} );
+	it( 'targets every point of a dataset item', () => {
+		expect(
+			highlightTargets( { kind: 'dataset', index: 1 }, [ 2, 3 ] )
+		).toEqual( [
+			{ datasetIndex: 1, index: 0 },
+			{ datasetIndex: 1, index: 1 },
+			{ datasetIndex: 1, index: 2 },
+		] );
+	} );
+	it( 'returns nothing for a missing dataset', () => {
+		expect(
+			highlightTargets( { kind: 'dataset', index: 5 }, [ 2 ] )
+		).toEqual( [] );
 	} );
 } );
 

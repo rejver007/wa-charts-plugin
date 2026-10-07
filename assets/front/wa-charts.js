@@ -37,6 +37,82 @@
 		return plugins;
 	}
 
+	/**
+	 * Legend behaviour that highlights a slice or series instead of hiding
+	 * it: hovering or focusing an item highlights it for as long as the
+	 * pointer or focus stays, and clicking pins the highlight until the item
+	 * (or another one) is clicked.
+	 *
+	 * @param {Object} chart   Chart.js instance.
+	 * @param {Object} payload Chart payload.
+	 * @return {Object} Highlighter with a bind( item, li, button ) method.
+	 */
+	function legendHighlighter( chart, payload ) {
+		const tooltips =
+			! payload.display || payload.display.tooltips !== false;
+		let pinned = null;
+
+		const activate = ( item ) => {
+			const sizes = chart.data.datasets.map( ( ds ) => ds.data.length );
+			const targets = item
+				? WaCharts.highlightTargets( item, sizes )
+				: [];
+			chart.setActiveElements( targets );
+			if ( chart.tooltip ) {
+				const first = targets[ 0 ];
+				const element =
+					first &&
+					chart.getDatasetMeta( first.datasetIndex ).data[
+						first.index
+					];
+				chart.tooltip.setActiveElements(
+					tooltips && element ? targets : [],
+					element ? element.tooltipPosition() : { x: 0, y: 0 }
+				);
+			}
+			chart.update();
+		};
+
+		const entries = [];
+		const mark = () => {
+			entries.forEach( ( entry ) => {
+				const on = pinned === entry.item;
+				entry.li.classList.toggle( 'is-active', on );
+				entry.button.setAttribute(
+					'aria-pressed',
+					on ? 'true' : 'false'
+				);
+			} );
+		};
+
+		// Chart.js clears hover state when the pointer leaves the canvas;
+		// bring a pinned highlight back afterwards.
+		if ( chart.canvas ) {
+			chart.canvas.addEventListener( 'mouseleave', () => {
+				if ( pinned ) {
+					window.setTimeout( () => activate( pinned ), 0 );
+				}
+			} );
+		}
+
+		return {
+			bind( item, li, button ) {
+				entries.push( { item, li, button } );
+				const show = () => activate( item );
+				const restore = () => activate( pinned );
+				button.addEventListener( 'mouseenter', show );
+				button.addEventListener( 'focus', show );
+				button.addEventListener( 'mouseleave', restore );
+				button.addEventListener( 'blur', restore );
+				button.addEventListener( 'click', () => {
+					pinned = pinned === item ? null : item;
+					mark();
+					activate( pinned || item );
+				} );
+			},
+		};
+	}
+
 	function renderLegend( root, chart, payload ) {
 		const list = root.querySelector( '.wa-chart__legend' );
 		if ( ! list ) {
@@ -48,6 +124,10 @@
 			list.hidden = true;
 			return;
 		}
+		const highlight =
+			legend.on_click === 'highlight'
+				? legendHighlighter( chart, payload )
+				: null;
 		WaCharts.legendItems( payload ).forEach( ( item ) => {
 			const li = document.createElement( 'li' );
 			li.className = 'wa-chart__legend-item';
@@ -73,6 +153,9 @@
 
 			if ( payload.type === 'radial' ) {
 				button.disabled = true;
+			} else if ( highlight ) {
+				button.setAttribute( 'aria-pressed', 'false' );
+				highlight.bind( item, li, button );
 			} else {
 				button.addEventListener( 'click', () => {
 					if ( item.kind === 'data' ) {

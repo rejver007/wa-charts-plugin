@@ -106,7 +106,7 @@
 .wa-chart .wa-chart__legend .wa-chart__legend-button:active {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.5em;
+	gap: var(--wa-chart-legend-gap, 0.5em);
 	width: auto;
 	min-width: 0;
 	min-height: 0;
@@ -138,6 +138,10 @@
 
 .wa-chart .wa-chart__legend .wa-chart__legend-button:disabled {
 	cursor: default;
+}
+
+.wa-chart .wa-chart__legend .wa-chart__legend-item.is-active .wa-chart__legend-label {
+	text-decoration: underline;
 }
 
 .wa-chart__legend-item.is-hidden {

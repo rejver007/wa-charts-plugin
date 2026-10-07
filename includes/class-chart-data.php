@@ -24,6 +24,7 @@ final class Chart_Data {
 	public const MAX_BYTES        = 102400;
 	public const LAYOUTS          = array( 'left', 'right', 'top' );
 	public const LEGEND_POSITIONS = array( 'bottom', 'right', 'none' );
+	public const LEGEND_CLICKS    = array( 'toggle', 'highlight' );
 	public const LABEL_FORMATS    = array( 'value', 'percent' );
 	public const LOCALES          = array( 'fi-FI', 'en-US', 'sv-SE', 'de-DE' );
 	public const HEADING_TAGS     = array(
@@ -81,6 +82,7 @@ final class Chart_Data {
 				'position'    => 'bottom',
 				'columns'     => 1,
 				'show_values' => true,
+				'on_click'    => 'toggle',
 			),
 			'value'        => array(
 				'prefix'   => '',
@@ -342,6 +344,7 @@ final class Chart_Data {
 				'position'    => self::choice( $legend['position'] ?? null, self::LEGEND_POSITIONS, 'bottom' ),
 				'columns'     => (int) self::between( $legend['columns'] ?? null, 1, 2, 1, true ),
 				'show_values' => self::boolean( $legend['show_values'] ?? null, true ),
+				'on_click'    => self::choice( $legend['on_click'] ?? null, self::LEGEND_CLICKS, 'toggle' ),
 			),
 			'value'        => array(
 				'prefix'   => self::affix( $value['prefix'] ?? '' ),
